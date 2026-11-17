@@ -1,0 +1,19 @@
+# environnements et outils installés localement
+.venv/
+outils/ComfyUI_windows_portable/
+outils/hf-cache/
+*.7z
+__pycache__/
+
+# secrets
+elevenlabs.key
+.env
+
+# résultats et fichiers de travail
+exports/
+travail/
+sources/
+logs/
+cache/
+historique.json
+base/corps*/

@@ -1,0 +1,52 @@
+{
+  "salutation": "Ho, ho, ho ! Bonjour {prenom} !",
+  "corps": [
+    {
+      "texte": "Tes parents m'ont dit que tu allais être encore plus sage cette année.",
+      "pause": 0.6,
+      "plan": "serre"
+    },
+    {
+      "texte": "Bien ranger ta chambre, bien te brosser les dents, et faire tout ce qu'il faut pour être un enfant sage, pour que je puisse t'apporter tous les cadeaux que tu veux pour Noël.",
+      "pause": 0.7,
+      "plan": "large"
+    },
+    {
+      "texte": "Je sais qu'il y a beaucoup d'enfants qui me demandent des cadeaux, donc je ne pourrai peut-être pas trouver tous ceux que tu veux.",
+      "pause": 0.45,
+      "plan": "large"
+    },
+    {
+      "texte": "Mais en tout cas, je te promets de faire de mon mieux pour te faire plaisir.",
+      "pause": 0.7,
+      "plan": "serre"
+    },
+    {
+      "texte": "Alors en échange, toi aussi, fais de ton mieux pour faire plaisir à tes parents. Joyeux Noël !",
+      "pause": 1.4,
+      "plan": "large"
+    }
+  ],
+  "comfyui": "outils/ComfyUI_windows_portable",
+  "dossier_corps": "base/corps",
+  "essais_corps": 4,
+  "essais_salut": 3,
+  "voix_reference": "voix/reference.wav",
+  "voix_reference_texte": "Ho, ho, ho ! Bonjour Léa ! Tes parents m'ont dit que tu allais être encore plus sage cette année. Je te promets de faire de mon mieux pour te faire plaisir. Joyeux Noël !",
+  "portrait": "base/santa.png",
+  "largeur": 1280,
+  "hauteur": 720,
+  "fps": 25,
+  "prompt_video": "Santa Claus speaks warmly and kindly to the camera, natural lip movements, gentle head movements, soft smile, blinking, sitting still in his armchair, warm firelight flickering in the background, static camera.",
+  "graine_video": 2412,
+  "etapes": 6,
+  "corps_debut_silence": 0.15,
+  "ralenti_voix": 0.9,
+  "zoom_serre": 1.3,
+  "centre_visage": [
+    664,
+    290
+  ],
+  "musique": null,
+  "musique_volume_db": -26
+}

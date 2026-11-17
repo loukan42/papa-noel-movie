@@ -1,0 +1,577 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Message du Père Noël</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23f2c066' d='M12 1.5l2.6 7.9H23l-6.8 4.9 2.6 8-6.8-5-6.8 5 2.6-8L1 9.4h8.4z'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a1310; --panel:rgba(19,31,26,.82); --line:rgba(236,226,206,.10); --line2:rgba(236,226,206,.20);
+  --text:#f5efe4; --muted:#aab4ab; --dim:#748277;
+  --red:#d33a3f; --red2:#a8262d; --gold:#f2c066; --green:#5bb586;
+  --serif:"Fraunces", Georgia, "Times New Roman", serif;
+  --sans:"Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  min-height:100vh; color:var(--text); font:15px/1.5 var(--sans);
+  background:
+    radial-gradient(1100px 650px at 78% -12%, rgba(242,192,102,.13), transparent 62%),
+    radial-gradient(900px 620px at -5% 105%, rgba(211,58,63,.10), transparent 60%),
+    var(--bg);
+}
+#neige{position:fixed; inset:0; width:100%; height:100%; pointer-events:none; z-index:0}
+.page{position:relative; z-index:1; max-width:1480px; margin:0 auto; padding:28px 32px 72px}
+button{font:inherit; color:inherit}
+[hidden]{display:none !important}
+
+/* en-tête */
+.marque{display:flex; align-items:center; gap:8px; color:var(--gold); font-size:12.5px; font-weight:600; letter-spacing:.14em; text-transform:uppercase}
+h1{font-family:var(--serif); font-weight:700; font-size:clamp(34px,4.2vw,56px); line-height:1.05; letter-spacing:-.015em; margin:8px 0 6px}
+.sous{margin:0; color:var(--muted); font-size:16px}
+
+.grille{display:grid; grid-template-columns:minmax(0,1fr) 390px; gap:28px; margin-top:26px; align-items:start}
+@media (max-width:1080px){ .grille{grid-template-columns:1fr} }
+
+/* saisie */
+.lab{display:block; font-size:13px; font-weight:600; color:var(--muted); margin-bottom:8px}
+.ligne{display:flex; gap:12px}
+.champ{
+  flex:1; min-width:0; background:rgba(255,255,255,.045); border:1px solid var(--line2); border-radius:14px;
+  color:var(--text); font:600 24px/1.2 var(--sans); padding:16px 20px; outline:none; transition:border-color .2s, box-shadow .2s;
+}
+.champ::placeholder{color:rgba(245,239,228,.28)}
+.champ:focus{border-color:var(--gold); box-shadow:0 0 0 4px rgba(242,192,102,.16)}
+.go{
+  flex:none; border:0; border-radius:14px; padding:0 28px; cursor:pointer; color:#fff; font-weight:700; font-size:17px;
+  background:linear-gradient(180deg,var(--red),var(--red2)); box-shadow:0 10px 28px rgba(211,58,63,.35), inset 0 1px 0 rgba(255,255,255,.22);
+  transition:transform .15s, box-shadow .2s;
+}
+.go:hover{transform:translateY(-1px); box-shadow:0 14px 32px rgba(211,58,63,.45), inset 0 1px 0 rgba(255,255,255,.22)}
+.go:active{transform:none}
+.go:disabled{opacity:.6; cursor:wait}
+.pron{margin-top:10px; color:var(--muted); font-size:13.5px}
+.pron summary{cursor:pointer; width:max-content; list-style:none}
+.pron summary::-webkit-details-marker{display:none}
+.pron summary::before{content:"+ "; color:var(--gold)}
+.pron[open] summary::before{content:"− "}
+.pron .champ{font-size:16px; padding:11px 14px; margin-top:8px; width:min(460px,100%); display:block}
+.msg{min-height:22px; margin:8px 0 0; font-size:14px; color:var(--muted)}
+.msg.err{color:#ff8f8f}
+
+/* scène */
+.scene{
+  position:relative; aspect-ratio:16/9; margin-top:14px; border-radius:22px; overflow:hidden; background:#000;
+  border:1px solid var(--line); box-shadow:0 30px 90px rgba(0,0,0,.5), 0 0 0 1px rgba(0,0,0,.4);
+}
+.scene img.portrait{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; transition:filter .8s, transform 1.2s}
+.scene.calcul img.portrait{filter:brightness(.42) saturate(.85) blur(3px); transform:scale(1.05)}
+.scene video{position:absolute; inset:0; width:100%; height:100%; background:#000}
+.voile{position:absolute; inset:0; display:flex; flex-direction:column; justify-content:flex-end; padding:34px 40px;
+  background:linear-gradient(180deg, transparent 50%, rgba(0,0,0,.7))}
+.repos-texte{font-family:var(--serif); font-size:clamp(22px,2.4vw,32px); font-weight:600; max-width:640px; text-shadow:0 2px 20px rgba(0,0,0,.6)}
+.repos-texte small{display:block; font-family:var(--sans); font-size:15px; font-weight:500; color:rgba(255,255,255,.72); margin-top:6px}
+.calc{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:24px}
+.c-bonjour{font-size:clamp(14px,1.4vw,18px); color:var(--gold); font-weight:600; letter-spacing:.14em; text-transform:uppercase}
+.c-nom{font-family:var(--serif); font-weight:700; font-size:clamp(52px,8vw,112px); line-height:1.02; margin:6px 0 4px; text-shadow:0 6px 40px rgba(0,0,0,.65); word-break:break-word}
+.c-phase{font-size:clamp(16px,1.6vw,21px); color:#fff; opacity:.92; min-height:1.5em}
+.barre{width:min(560px,72%); height:8px; border-radius:99px; background:rgba(255,255,255,.16); overflow:hidden; margin:24px auto 12px}
+.barre i{display:block; height:100%; width:0; border-radius:inherit; background:linear-gradient(90deg,var(--gold),#ffe0a1); transition:width .9s ease; box-shadow:0 0 18px rgba(242,192,102,.7)}
+.c-temps{color:rgba(255,255,255,.72); font-variant-numeric:tabular-nums; font-size:14.5px}
+.c-ecoute{margin-top:18px}
+.pill{display:inline-flex; align-items:center; gap:8px; border:1px solid rgba(255,255,255,.25); background:rgba(0,0,0,.35); color:#fff;
+  border-radius:99px; padding:8px 16px 8px 12px; cursor:pointer; font-weight:600; font-size:14px; backdrop-filter:blur(4px)}
+.pill:hover{border-color:var(--gold)}
+.badge-calcul{position:absolute; top:16px; left:16px; z-index:3}
+.badge-calcul .pill{font-size:13px}
+.sous-scene{display:flex; align-items:center; justify-content:space-between; gap:16px; margin-top:12px; min-height:34px; color:var(--muted); font-size:14px}
+.sous-scene strong{color:var(--text); font-family:var(--serif); font-size:20px; font-weight:600; margin-right:8px}
+.lien{color:var(--gold); text-decoration:none; font-weight:600}
+.lien:hover{text-decoration:underline}
+
+/* panneau en direct */
+.carte{background:var(--panel); border:1px solid var(--line); border-radius:18px; padding:20px 18px; backdrop-filter:blur(8px)}
+.carte + .carte{margin-top:16px}
+.carte-titre{display:flex; align-items:center; gap:10px; font-size:12.5px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); padding:0 4px}
+.pastille{width:9px; height:9px; border-radius:50%; background:var(--dim)}
+.pastille.on{background:var(--red); animation:pouls 1.6s infinite}
+@keyframes pouls{0%{box-shadow:0 0 0 0 rgba(211,58,63,.65)}70%{box-shadow:0 0 0 9px rgba(211,58,63,0)}100%{box-shadow:0 0 0 0 rgba(211,58,63,0)}}
+.vide{color:var(--dim); padding:14px 4px 2px; font-size:14px}
+.etapes{list-style:none; margin:12px 0 0; padding:0; display:grid; gap:2px}
+.etapes li{display:grid; grid-template-columns:30px minmax(0,1fr) auto; gap:12px; padding:12px 10px; border-radius:12px; transition:background .3s}
+.etapes li.actif{background:rgba(242,192,102,.08)}
+.puce{position:relative; width:30px; height:30px; border-radius:50%; display:grid; place-items:center; border:1.5px solid var(--line2); color:var(--dim); font-size:13px; font-weight:700}
+li.actif .puce{border-color:transparent; color:var(--gold)}
+li.actif .puce::after{content:""; position:absolute; inset:-1.5px; border-radius:50%; border:2px solid rgba(242,192,102,.25); border-top-color:var(--gold); animation:tourne 1s linear infinite}
+li.fait .puce{background:var(--green); border-color:var(--green); color:#0a1310}
+@keyframes tourne{to{transform:rotate(360deg)}}
+.e-titre{font-weight:600; line-height:30px}
+li.a-venir .e-titre{color:var(--muted)}
+.e-detail{color:var(--muted); font-size:13.5px; line-height:1.45}
+.e-temps{color:var(--dim); font-size:13px; line-height:30px; font-variant-numeric:tabular-nums}
+li.actif .e-temps{color:var(--gold)}
+.prises{display:grid; gap:6px; margin-top:8px}
+.prise{display:flex; align-items:center; gap:9px; font-size:13px; background:rgba(255,255,255,.04); border:1px solid var(--line); border-radius:10px; padding:6px 9px 6px 6px; animation:entre .35s ease}
+.prise.gardee{border-color:rgba(91,181,134,.65); background:rgba(91,181,134,.12)}
+.prise .t{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.prise .tag{flex:none; font-size:11.5px; font-weight:700; color:var(--green); text-transform:uppercase; letter-spacing:.06em}
+.prise .score{flex:none; color:var(--dim); font-variant-numeric:tabular-nums}
+@keyframes entre{from{opacity:0; transform:translateY(4px)}to{opacity:1; transform:none}}
+.lire{flex:none; width:28px; height:28px; border-radius:50%; border:0; background:rgba(255,255,255,.1); cursor:pointer; display:grid; place-items:center; transition:background .2s}
+.lire:hover{background:rgba(242,192,102,.3)}
+.lire svg{width:12px; height:12px; fill:currentColor}
+.mini{height:4px; border-radius:99px; background:rgba(255,255,255,.1); overflow:hidden; margin-top:8px}
+.mini i{display:block; height:100%; width:0; background:var(--gold); transition:width .8s}
+.alerte{margin:12px 4px 0; padding:10px 12px; border-radius:10px; background:rgba(242,192,102,.1); border:1px solid rgba(242,192,102,.35); color:#ffe2a6; font-size:13.5px}
+.erreur{margin:12px 4px 0; padding:12px; border-radius:10px; background:rgba(211,58,63,.12); border:1px solid rgba(211,58,63,.45); font-size:13.5px}
+.erreur pre{white-space:pre-wrap; max-height:180px; overflow:auto; font-size:11.5px; color:#ffb4b4; margin:8px 0}
+.erreur .pill{font-size:13px; padding:6px 14px}
+.journal{margin:14px 4px 0; font-size:13px; color:var(--dim)}
+.journal summary{cursor:pointer}
+.journal pre{margin:8px 0 0; max-height:220px; overflow:auto; background:rgba(0,0,0,.35); border-radius:10px; padding:10px; font:11.5px/1.45 ui-monospace, Consolas, monospace; color:#c9d1c9; white-space:pre-wrap}
+.file{list-style:none; margin:10px 0 0; padding:0; display:grid; gap:6px}
+.file li{display:flex; align-items:center; gap:10px; padding:9px 10px 9px 14px; border-radius:10px; background:rgba(255,255,255,.04); border:1px solid var(--line); animation:entre .3s ease}
+.file .n{flex:1; font-weight:600}
+.file .rang{color:var(--dim); font-size:12.5px; font-variant-numeric:tabular-nums}
+.retirer{border:0; background:none; color:var(--dim); cursor:pointer; font-size:18px; line-height:1; padding:2px 6px; border-radius:6px}
+.retirer:hover{color:#fff; background:rgba(255,255,255,.08)}
+
+/* historique */
+.histoire{margin-top:44px}
+.h-tete{display:flex; align-items:baseline; gap:14px; margin-bottom:16px}
+h2{font-family:var(--serif); font-weight:700; font-size:30px; margin:0}
+.compte{color:var(--dim); font-size:14px}
+.cartes{display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:18px}
+.vcarte{position:relative; text-align:left; padding:0; border:1px solid var(--line); border-radius:16px; overflow:hidden; background:var(--panel); cursor:pointer; transition:transform .2s, border-color .2s, box-shadow .2s; animation:entre .4s ease}
+.vcarte:hover{transform:translateY(-3px); border-color:var(--line2); box-shadow:0 18px 40px rgba(0,0,0,.35)}
+.vcarte.joue{border-color:var(--gold); box-shadow:0 0 0 1px var(--gold), 0 18px 40px rgba(0,0,0,.35)}
+.vcarte.neuve{animation:neuve 2.4s ease 2}
+@keyframes neuve{0%,100%{box-shadow:0 0 0 0 rgba(242,192,102,0)}40%{box-shadow:0 0 0 4px rgba(242,192,102,.55), 0 0 40px rgba(242,192,102,.35)}}
+.vimg{position:relative; aspect-ratio:16/9; background:#111 center/cover no-repeat}
+.vimg img{width:100%; height:100%; object-fit:cover; display:block}
+.vimg .duree{position:absolute; right:8px; bottom:8px; background:rgba(0,0,0,.7); border-radius:6px; padding:1px 7px; font-size:12px; font-weight:600; font-variant-numeric:tabular-nums}
+.vimg .jouer{position:absolute; inset:0; display:grid; place-items:center; opacity:0; transition:opacity .2s; background:rgba(0,0,0,.25)}
+.vcarte:hover .jouer{opacity:1}
+.jouer span{width:54px; height:54px; border-radius:50%; background:rgba(211,58,63,.92); display:grid; place-items:center; box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.jouer svg{width:20px; height:20px; fill:#fff; margin-left:3px}
+.vinfo{padding:12px 14px 14px}
+.vnom{font-family:var(--serif); font-size:22px; font-weight:600; display:flex; align-items:center; gap:8px; line-height:1.2}
+.version{font-family:var(--sans); font-size:11px; font-weight:700; color:var(--gold); border:1px solid rgba(242,192,102,.5); border-radius:6px; padding:1px 6px}
+.vmeta{color:var(--muted); font-size:13px; margin-top:4px}
+.vide-hist{color:var(--dim); padding:20px 0}
+
+@media (max-width:640px){
+  .page{padding:20px 16px 56px}
+  .ligne{flex-direction:column}
+  .go{padding:14px}
+  .voile{padding:18px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none !important; transition:none !important}
+}
+</style>
+</head>
+<body>
+<canvas id="neige" aria-hidden="true"></canvas>
+<div class="page">
+  <header>
+    <div class="marque">
+      <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 1.5l2.6 7.9H23l-6.8 4.9 2.6 8-6.8-5-6.8 5 2.6-8L1 9.4h8.4z"/></svg>
+      Vidéo personnalisée
+    </div>
+    <h1>Le message du Père Noël</h1>
+    <p class="sous">Tape un prénom : le Père Noël le dit dans sa vidéo. Tout se calcule sur cet ordinateur.</p>
+  </header>
+
+  <main class="grille">
+    <section>
+      <form id="form" autocomplete="off">
+        <label class="lab" for="prenom">Prénom de l'enfant</label>
+        <div class="ligne">
+          <input class="champ" id="prenom" maxlength="40" placeholder="Léa" spellcheck="false" required>
+          <button class="go" id="go" type="submit">Créer la vidéo</button>
+        </div>
+        <details class="pron" id="pronBloc">
+          <summary>La voix prononce mal ce prénom ?</summary>
+          <input class="champ" id="prononciation" maxlength="60" placeholder="L'écrire comme il se prononce, par exemple Ma-elle">
+        </details>
+        <p class="msg" id="msg" role="status"></p>
+      </form>
+
+      <div class="scene" id="scene">
+        <img class="portrait" src="/f/base/santa.png" alt="">
+        <video id="lecteur" controls playsinline preload="metadata" hidden></video>
+        <div class="voile" id="repos">
+          <div class="repos-texte">Il attend un prénom.<small>Compter quelques minutes par vidéo. Les suivants patientent dans la file.</small></div>
+        </div>
+        <div class="calc" id="calc" hidden>
+          <div class="c-bonjour">Bonjour</div>
+          <div class="c-nom" id="cNom"></div>
+          <div class="c-phase" id="cPhase"></div>
+          <div class="barre"><i id="cBarre"></i></div>
+          <div class="c-temps" id="cTemps"></div>
+          <div class="c-ecoute" id="cEcoute" hidden>
+            <button class="pill" type="button" id="cEcouteBtn">
+              <svg width="12" height="12" viewBox="0 0 24 24"><path fill="currentColor" d="M6 4l14 8-14 8z"/></svg>
+              Écouter la voix
+            </button>
+          </div>
+        </div>
+        <div class="badge-calcul" id="badge" hidden><button class="pill" type="button" id="badgeBtn"></button></div>
+      </div>
+      <div class="sous-scene" id="sousScene"></div>
+    </section>
+
+    <aside>
+      <div class="carte">
+        <div class="carte-titre"><span class="pastille" id="pastille"></span>En direct</div>
+        <div class="vide" id="directVide">Rien en cours.</div>
+        <ol class="etapes" id="etapes" hidden></ol>
+        <div class="alerte" id="alerte" hidden></div>
+        <div class="erreur" id="erreur" hidden></div>
+        <details class="journal" id="journalBloc" hidden><summary>Journal technique</summary><pre id="journal"></pre></details>
+      </div>
+      <div class="carte" id="fileCarte" hidden>
+        <div class="carte-titre">File d'attente</div>
+        <ul class="file" id="file"></ul>
+      </div>
+    </aside>
+  </main>
+
+  <section class="histoire">
+    <div class="h-tete"><h2>Vidéos déjà créées</h2><span class="compte" id="compte"></span></div>
+    <div class="cartes" id="historique"></div>
+  </section>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const ICONE_LIRE = '<svg viewBox="0 0 24 24"><path d="M6 4l14 8-14 8z"/></svg>';
+const ICONE_PAUSE = '<svg viewBox="0 0 24 24"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>';
+const ETAPES = [
+  {id:'voix', titre:'Voix', phase:'Synthèse de la voix'},
+  {id:'ecoute', titre:'Écoute', phase:'Choix de la meilleure prise'},
+  {id:'animation', titre:'Animation du visage', phase:'Animation du visage'},
+  {id:'montage', titre:'Montage', phase:'Montage final'},
+];
+const POIDS = {voix:.36, ecoute:.2, animation:.36, montage:.08};
+
+let mode = 'repos';            // repos | calcul | lecture
+let suivi = null;              // job en cours au dernier passage
+let affiche = null;            // job dont le panneau « En direct » montre les étapes
+let envoiA = 0;                // heure du dernier envoi de prénom
+let enLecture = null;          // nom du fichier lu
+let histo = [], sigHisto = null, estimation = 420;
+let derniereErreurVue = null, neuves = new Set();
+const audio = new Audio(); let audioSrc = null;
+
+/* ---------- formats ---------- */
+const mmss = s => { s = Math.max(0, Math.round(s)); return Math.floor(s/60) + ':' + String(s%60).padStart(2,'0'); };
+const minutes = s => { s = Math.round(s); if (s < 60) return s + ' s'; const q = Math.round(s/30), m = Math.floor(q/2); return q % 2 ? m + ' min 30' : m + ' min'; };
+const quand = iso => { const d = new Date(iso); if (isNaN(d)) return ''; const auj = new Date().toDateString() === d.toDateString();
+  const h = d.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+  return auj ? "aujourd'hui à " + h : d.toLocaleDateString('fr-FR', {day:'numeric', month:'short'}) + ' à ' + h; };
+const el = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
+
+/* ---------- audio des prises ---------- */
+function boutonLire(src){
+  const b = el('button', 'lire'); b.type = 'button'; b.title = 'Écouter'; b.dataset.src = src;
+  b.innerHTML = (audioSrc === src && !audio.paused) ? ICONE_PAUSE : ICONE_LIRE;
+  b.onclick = () => basculerAudio(src);
+  return b;
+}
+function basculerAudio(src){
+  if (audioSrc === src && !audio.paused){ audio.pause(); }
+  else { if (!$('#lecteur').paused) $('#lecteur').pause(); audioSrc = src; audio.src = src; audio.play().catch(()=>{}); }
+  majIconesAudio();
+}
+function majIconesAudio(){ document.querySelectorAll('.lire').forEach(b => b.innerHTML = (b.dataset.src === audioSrc && !audio.paused) ? ICONE_PAUSE : ICONE_LIRE); }
+audio.onended = audio.onpause = audio.onplay = majIconesAudio;
+
+/* ---------- scène ---------- */
+function setMode(m){
+  mode = m;
+  const sc = $('#scene'), v = $('#lecteur');
+  sc.classList.toggle('calcul', m === 'calcul');
+  $('#repos').hidden = m !== 'repos';
+  $('#calc').hidden = m !== 'calcul';
+  v.hidden = m !== 'lecture';
+  if (m !== 'lecture'){ v.pause(); enLecture = null; }
+  majCartesActives(); majSousScene();
+}
+function lire(fichier, auto = true){
+  const v = $('#lecteur');
+  audio.pause();
+  enLecture = fichier;
+  setMode('lecture'); enLecture = fichier;
+  v.src = '/f/exports/' + encodeURIComponent(fichier);
+  if (auto) v.play().catch(()=>{});
+  majCartesActives(); majSousScene();
+}
+function majSousScene(){
+  const z = $('#sousScene'); z.replaceChildren();
+  if (mode !== 'lecture' || !enLecture) return;
+  const e = histo.find(h => h.fichier === enLecture);
+  const g = el('div'); g.append(el('strong', null, e ? e.prenom : enLecture));
+  if (e && e.version > 1) g.append(el('span', 'version', 'v' + e.version), ' ');
+  if (e && e.duree) g.append(' ' + mmss(e.duree));
+  const d = el('div');
+  const a = el('a', 'lien', 'Télécharger'); a.href = '/f/exports/' + encodeURIComponent(enLecture); a.download = enLecture;
+  d.append(a);
+  z.append(g, d);
+}
+
+/* ---------- en direct ---------- */
+function progression(j){
+  const idx = ETAPES.findIndex(e => e.id === j.etape);
+  if (idx < 0) return .02;
+  let p = 0; for (let i = 0; i < idx; i++) p += POIDS[ETAPES[i].id];
+  const depuis = id => (j.debut + j.ecoule) - (j.etapes[id] || j.debut);
+  const asym = (t, tau) => .92 * (1 - Math.exp(-t / tau));
+  let f = 0;
+  if (j.etape === 'voix') f = Math.min(1, j.prises.length / 3) * .95;
+  else if (j.etape === 'ecoute') f = asym(depuis('ecoute'), 25);
+  else if (j.etape === 'animation' && j.morceau){ const s = j.pas ? j.pas[0] / j.pas[1] : 0; f = ((j.morceau.k - 1) + s) / j.morceau.n; }
+  else if (j.etape === 'montage') f = asym(depuis('montage'), 20);
+  return Math.min(.995, p + POIDS[j.etape] * f);
+}
+function detailAnimation(j){
+  if (!j.morceau) return 'Préparation du rendu';
+  const m = j.morceau.n > 1 ? `Morceau ${j.morceau.k} sur ${j.morceau.n}` : 'Un seul morceau à calculer';
+  if (!j.pas) return m + (j.comfyui_pret ? ', démarrage' : ', chargement des modèles');
+  if (j.pas[0] >= j.pas[1]) return m + ' · décodage des images';
+  return `${m} · passe ${j.pas[0] + 1} sur ${j.pas[1]}`;
+}
+let sigEtapes = null;
+function majTemps(j){
+  ETAPES.forEach((e, i) => {
+    const t = document.querySelector(`#etapes li[data-e="${e.id}"] .e-temps`), debut = j.etapes[e.id];
+    if (!t || !debut) return;
+    const suivant = ETAPES[i + 1] && j.etapes[ETAPES[i + 1].id];
+    const fin = suivant || (j.statut === 'en_cours' ? j.debut + j.ecoule : (j.fin || debut));
+    t.textContent = mmss(fin - debut);
+  });
+}
+function rendreEtapes(j){
+  // on ne reconstruit la liste que si son contenu change (sinon les prises clignotent)
+  const sig = JSON.stringify([j.id, j.statut, j.etape, j.texte, j.prises, j.choix, j.morceau, j.pas, j.comfyui_pret]);
+  if (sig === sigEtapes){ majTemps(j); return; }
+  sigEtapes = sig;
+  const ol = $('#etapes'); ol.replaceChildren();
+  const idx = j.statut === 'fini' ? ETAPES.length : ETAPES.findIndex(e => e.id === j.etape);
+  ETAPES.forEach((e, i) => {
+    const etat = i < idx ? 'fait' : i === idx ? 'actif' : 'a-venir';
+    const li = el('li', etat); li.dataset.e = e.id;
+    const puce = el('div', 'puce', i < idx ? '✓' : String(i + 1));
+    const corps = el('div'); corps.append(el('div', 'e-titre', e.titre));
+    const t = el('div', 'e-temps');
+    let det = null;
+    if (e.id === 'voix'){
+      det = el('div', 'e-detail', j.texte ? `Trois prises de « ${j.texte} »` : 'Trois prises de la phrase avec le prénom');
+      if (j.prises.length && !j.choix){
+        const box = el('div', 'prises');
+        j.prises.forEach((p, k) => { const r = el('div', 'prise'); r.append(boutonLire('/f/' + p.fichier), el('span', 't', `Prise ${k + 1}`), el('span', 'score', (p.duree || 0).toFixed(1).replace('.', ',') + ' s')); box.append(r); });
+        det.append(box);
+      }
+    } else if (e.id === 'ecoute'){
+      det = el('div', 'e-detail', 'Whisper vérifie le texte. On garde la prise dont la voix ressemble le plus au message.');
+      if (j.choix){
+        const box = el('div', 'prises');
+        j.choix.forEach(p => { const r = el('div', 'prise' + (p.gardee ? ' gardee' : ''));
+          r.append(boutonLire('/f/' + p.fichier), el('span', 't', `« ${p.texte.trim()} »`));
+          const score = p.sim != null ? 'voix ' + Math.round(p.sim * 100) + ' %' : Math.round(p.ratio * 100) + ' %';
+          r.append(p.gardee ? el('span', 'tag', 'gardée') : el('span', 'score', score));
+          r.title = `${p.texte}\ntexte ${Math.round(p.ratio * 100)} %` + (p.sim != null ? ` · voix ${Math.round(p.sim * 100)} %` : '');
+          box.append(r); });
+        det.append(box);
+      }
+    } else if (e.id === 'animation'){
+      det = el('div', 'e-detail', etat === 'actif' ? detailAnimation(j) : 'InfiniteTalk fait bouger les lèvres sur la voix.');
+      if (etat === 'actif' && j.morceau){ const m = el('div', 'mini'); const b = el('i'); b.style.width = (((j.morceau.k - 1) + (j.pas ? j.pas[0] / j.pas[1] : 0)) / j.morceau.n * 100) + '%'; m.append(b); det.append(m); }
+    } else {
+      det = el('div', 'e-detail', 'Raccord avec le message, musique, réglage du son.');
+    }
+    corps.append(det);
+    li.append(puce, corps, t);
+    ol.append(li);
+  });
+  majTemps(j); majIconesAudio();
+}
+function rendreDirect(s){
+  const j = s.courant;
+  $('#pastille').classList.toggle('on', !!j);
+  const montrer = j || s.termines.find(t => t.id === affiche) || null;
+  $('#directVide').hidden = !!montrer;
+  $('#etapes').hidden = !montrer;
+  $('#journalBloc').hidden = !montrer;
+  if (montrer){
+    rendreEtapes(montrer);
+    const pre = $('#journal'), bas = pre.scrollTop + pre.clientHeight >= pre.scrollHeight - 20;
+    const txt = montrer.journal.join('\n');
+    if (pre.textContent !== txt){ pre.textContent = txt; if (bas) pre.scrollTop = pre.scrollHeight; }
+  }
+  const al = montrer && montrer.alerte; $('#alerte').hidden = !al; if (al) $('#alerte').textContent = al;
+
+  // échec du calcul affiché
+  const err = montrer && montrer.statut === 'erreur' && montrer.id !== derniereErreurVue ? montrer : null;
+  const boite = $('#erreur');
+  if (err && boite.dataset.id !== err.id){
+    boite.dataset.id = err.id; boite.replaceChildren();
+    boite.append(el('strong', null, `La vidéo de ${err.prenom} n'a pas pu être créée.`), el('pre', null, err.erreur || ''));
+    const r = el('button', 'pill', 'Relancer'); r.type = 'button';
+    r.onclick = () => { derniereErreurVue = err.id; boite.hidden = true; envoyer(err.prenom, err.prononciation).then(ok => ok && tick()); };
+    const f = el('button', 'pill', 'Fermer'); f.type = 'button'; f.style.marginLeft = '8px';
+    f.onclick = () => { derniereErreurVue = err.id; boite.hidden = true; };
+    boite.append(r, f);
+  }
+  boite.hidden = !err;
+
+  // scène
+  if (j){
+    $('#cNom').textContent = j.prenom;
+    const et = ETAPES.find(e => e.id === j.etape);
+    $('#cPhase').textContent = et ? et.phase : 'Démarrage';
+    $('#cBarre').style.width = (progression(j) * 100).toFixed(1) + '%';
+    $('#cTemps').textContent = `${mmss(j.ecoule)} · compter environ ${minutes(s.estimation)} en tout`;
+    $('#cEcoute').hidden = !j.voix;
+    $('#cEcouteBtn').onclick = () => basculerAudio('/f/' + j.voix);
+    const b = $('#badge'); b.hidden = mode === 'calcul';
+    $('#badgeBtn').textContent = `● ${j.prenom} en cours · ${Math.round(progression(j) * 100)} %`;
+  } else {
+    $('#badge').hidden = true;
+  }
+}
+let sigFile = null;
+function rendreFile(s){
+  $('#fileCarte').hidden = !s.attente.length;
+  const sig = JSON.stringify(s.attente.map(j => [j.id, j.prononciation]));
+  if (sig === sigFile) return;
+  sigFile = sig;
+  const ul = $('#file'); ul.replaceChildren();
+  s.attente.forEach((j, i) => {
+    const li = el('li'); li.append(el('span', 'rang', '#' + (i + 1)), el('span', 'n', j.prenom));
+    if (j.prononciation) li.append(el('span', 'rang', '« ' + j.prononciation + ' »'));
+    const x = el('button', 'retirer', '×'); x.type = 'button'; x.title = 'Retirer de la file';
+    x.onclick = async () => { await fetch('/api/retirer', {method:'POST', body: JSON.stringify({id: j.id})}); tick(); };
+    li.append(x); ul.append(li);
+  });
+}
+
+/* ---------- historique ---------- */
+async function chargerHisto(){
+  histo = await (await fetch('/api/historique')).json();
+  const box = $('#historique'); box.replaceChildren();
+  $('#compte').textContent = histo.length ? histo.length + (histo.length > 1 ? ' vidéos' : ' vidéo') : '';
+  if (!histo.length){ box.append(el('div', 'vide-hist', 'Les vidéos créées apparaîtront ici.')); return; }
+  histo.forEach(h => {
+    const c = el('button', 'vcarte' + (neuves.has(h.fichier) ? ' neuve' : '')); c.type = 'button'; c.dataset.f = h.fichier;
+    const im = el('div', 'vimg'); const img = el('img'); img.loading = 'lazy'; img.alt = ''; img.src = h.vignette; im.append(img);
+    if (h.duree) im.append(el('span', 'duree', mmss(h.duree)));
+    const j = el('div', 'jouer'); const rond = el('span'); rond.innerHTML = '<svg viewBox="0 0 24 24"><path d="M6 4l14 8-14 8z"/></svg>'; j.append(rond); im.append(j);
+    const info = el('div', 'vinfo'); const nom = el('div', 'vnom', h.prenom);
+    if (h.version > 1) nom.append(el('span', 'version', 'v' + h.version));
+    const meta = [quand(h.cree)]; if (h.temps_calcul) meta.push('calculée en ' + minutes(h.temps_calcul));
+    if (h.voix) meta.push('voix ' + h.voix);
+    else if (h.prononciation) meta.push('prononcé « ' + h.prononciation + ' »');
+    info.append(nom, el('div', 'vmeta', meta.join(' · ')));
+    c.append(im, info);
+    c.onclick = () => { lire(h.fichier); window.scrollTo({top: 0, behavior: 'smooth'}); };
+    box.append(c);
+  });
+  majCartesActives(); majSousScene();
+}
+function majCartesActives(){ document.querySelectorAll('.vcarte').forEach(c => c.classList.toggle('joue', mode === 'lecture' && c.dataset.f === enLecture)); }
+
+/* ---------- boucle ---------- */
+let enTick = false, dernierEtat = null, vus = null, horsLigne = false;
+async function tick(){
+  if (enTick) return; enTick = true;
+  try {
+    const s = await (await fetch('/api/etat')).json();
+    dernierEtat = s; estimation = s.estimation;
+    if (horsLigne){ horsLigne = false; $('#msg').textContent = ''; $('#msg').className = 'msg'; }
+    // vidéos finies depuis l'ouverture de la page : mises en avant dans l'historique
+    if (vus === null) vus = new Set(s.termines.map(t => t.id));
+    for (const t of s.termines) if (!vus.has(t.id)){ vus.add(t.id); if (t.statut === 'fini') neuves.add(t.fichier); }
+
+    const j = s.courant;
+    let aLire = null;
+    if (j){
+      if (j.id !== suivi){                           // un calcul commence
+        suivi = j.id; affiche = j.id;
+        if (mode !== 'lecture' || $('#lecteur').paused) setMode('calcul');
+      }
+    } else if (suivi){                               // le calcul suivi vient de finir
+      const fin = s.termines.find(t => t.id === suivi); suivi = null;
+      if (fin && fin.statut === 'fini' && (mode === 'calcul' || $('#lecteur').paused)) aLire = fin.fichier;
+      else if (mode === 'calcul' && !s.attente.length) setMode('repos');
+    } else if (mode === 'calcul' && !s.attente.length){  // échec avant même le premier affichage
+      const t0 = s.termines[0];
+      if (t0 && t0.debut * 1000 >= envoiA - 5000){ affiche = t0.id; if (t0.statut === 'fini') aLire = t0.fichier; }
+      if (!aLire) setMode('repos');
+    }
+    if (s.historique !== sigHisto){ sigHisto = s.historique; await chargerHisto(); }
+    if (aLire) lire(aLire);
+    rendreDirect(s); rendreFile(s);
+  } catch (e) {
+    horsLigne = true;
+    $('#msg').textContent = 'Le serveur ne répond plus. Relancer Ouvrir-Pere-Noel.cmd.'; $('#msg').className = 'msg err';
+  } finally { enTick = false; }
+}
+
+async function envoyer(prenom, prononciation){
+  const msg = $('#msg'); msg.className = 'msg'; msg.textContent = '';
+  envoiA = Date.now();
+  const r = await fetch('/api/generer', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({prenom, prononciation})});
+  const d = await r.json();
+  if (!r.ok){ msg.textContent = d.erreur || 'Refusé.'; msg.className = 'msg err'; return false; }
+  return true;
+}
+$('#form').addEventListener('submit', async ev => {
+  ev.preventDefault();
+  const p = $('#prenom').value.trim(), pr = $('#prononciation').value.trim();
+  if (!p) return;
+  $('#go').disabled = true;
+  const occupe = !!(dernierEtat && (dernierEtat.courant || dernierEtat.attente.length));
+  const ok = await envoyer(p, pr || null);
+  $('#go').disabled = false;
+  if (ok){
+    $('#prenom').value = ''; $('#prononciation').value = ''; $('#pronBloc').open = false;
+    if (occupe){ $('#msg').textContent = `${p} attend son tour dans la file.`; }
+    else { audio.pause(); setMode('calcul'); $('#cNom').textContent = p; $('#cPhase').textContent = 'Démarrage'; $('#cBarre').style.width = '2%'; $('#cTemps').textContent = ''; }
+    $('#prenom').focus();
+    tick();
+  }
+});
+$('#badgeBtn').onclick = () => setMode('calcul');
+$('#lecteur').addEventListener('play', () => audio.pause());
+
+setMode('repos');
+tick(); setInterval(tick, 1000);
+
+/* ---------- neige ---------- */
+(() => {
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const cv = $('#neige'), cx = cv.getContext('2d'); let W, H, flocons = [];
+  const taille = () => { const r = devicePixelRatio || 1; W = innerWidth; H = innerHeight; cv.width = W * r; cv.height = H * r; cx.setTransform(r, 0, 0, r, 0, 0); };
+  taille(); addEventListener('resize', taille);
+  for (let i = 0; i < 90; i++) flocons.push({x: Math.random() * W, y: Math.random() * H, r: .6 + Math.random() * 2, v: .15 + Math.random() * .45, d: Math.random() * 6.28, o: .15 + Math.random() * .4});
+  const pas = () => {
+    cx.clearRect(0, 0, W, H);
+    for (const f of flocons){
+      f.y += f.v; f.d += .01; f.x += Math.sin(f.d) * .25;
+      if (f.y > H + 5){ f.y = -5; f.x = Math.random() * W; }
+      cx.beginPath(); cx.arc(f.x, f.y, f.r, 0, 6.283); cx.fillStyle = `rgba(255,250,240,${f.o})`; cx.fill();
+    }
+    requestAnimationFrame(pas);
+  };
+  pas();
+})();
+</script>
+</body>
+</html>
