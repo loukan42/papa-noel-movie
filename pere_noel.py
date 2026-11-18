@@ -364,6 +364,7 @@ def video_corps(c):
     log("Rendu vidéo de la partie fixe (InfiniteTalk)…")
     assurer_comfyui()
     n = IT.rendre(c, ICI / c["portrait"], son, rendu, "corps", c["graine_video"], journal=log)
+    noter_portrait(c)
     if (rendu / "frames-hd").exists():
         shutil.rmtree(rendu / "frames-hd")  # images agrandies d'un ancien rendu
     superresolution(c, rendu, "corps")
@@ -435,6 +436,14 @@ def corps_depuis_complet(c, source, voix=None, ralenti=None, suffixe=None):
     composer_segments(c, dossier, [[d - debut, f - debut, p] for d, f, p in segs[1:]])
 
 
+def noter_portrait(c):
+    """Retient dans voix.json le portrait animé pour cette partie fixe : les salutations le reprennent."""
+    f = dossier_corps(c) / "voix.json"
+    infos = json.loads(f.read_text(encoding="utf-8")) if f.exists() else {}
+    infos["portrait"] = c["portrait"]
+    f.write_text(json.dumps(infos, ensure_ascii=False), encoding="utf-8")
+
+
 def infos_voix(c):
     """Réglages de la voix de la partie fixe (voix.json), s'il y en a."""
     f = dossier_corps(c) / "voix.json"
@@ -484,6 +493,8 @@ def generer(prenom, prononciation=None, c=None, salut_audio=None, elevenlabs_id=
     infos = infos_voix(c)
     if infos.get("ralenti"):
         c["ralenti_voix"] = infos["ralenti"]
+    if infos.get("portrait"):  # même visage que la partie fixe
+        c["portrait"] = infos["portrait"]
     suffixe = suffixe or infos.get("suffixe")
     if not salut_audio and not elevenlabs_id:
         elevenlabs_id = infos.get("elevenlabs_id")  # partie fixe faite avec ElevenLabs : même voix
