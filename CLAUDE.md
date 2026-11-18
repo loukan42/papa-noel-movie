@@ -1,14 +1,16 @@
 # Guide pour Claude Code : vidéo du Père Noël personnalisée
 
-Ce dépôt produit un MP4 (1920×1080, environ 38 s) où un Père Noël photoréaliste dit « Ho, ho, ho ! Bonjour {prénom} ! » puis le message de `config.json`. L'utilisateur n'est pas forcément développeur : parle-lui simplement, en français, et fais les manipulations à sa place.
+Ce dépôt produit un MP4 (1920×1080, environ 13 s) où un Père Noël photoréaliste dit « Ho, ho, ho ! Bonjour {prénom} ! » puis le message de `config.json`. L'utilisateur n'est pas forcément développeur : parle-lui simplement, en français, et fais les manipulations à sa place.
 
 Usage personnel, non commercial. Ne publie rien et ne pousse rien sur Git sans qu'il le demande.
 
 ## Quand l'utilisateur demande une vidéo
 
 1. Demande le prénom (et comment il se prononce s'il est rare), puis la voix :
-   - **gratuite** : voix de grand-père calculée sur le PC (Qwen3-TTS). Environ 1 h de préparation la première fois, puis 7 min par prénom.
-   - **ElevenLabs** : la voix de son choix dans son compte ElevenLabs. Environ 1 h par vidéo, et environ 600 crédits par prise (2 prises par défaut).
+   - **gratuite** : voix de grand-père calculée sur le PC (Qwen3-TTS).
+   - **ElevenLabs** : la voix de son choix dans son compte ElevenLabs.
+
+   Dans les deux cas, le message fixe est dit et animé **une seule fois** (environ 45 min avec la super-résolution), puis chaque prénom ne demande que la salutation animée (15 à 30 min selon sa longueur). Ne réanime jamais tout le message pour un nouveau prénom.
 2. Vérifie l'installation (section suivante) et complète ce qui manque.
 3. Lance la génération (sections « Voix gratuite » ou « Voix ElevenLabs »), en tâche de fond : c'est long.
 4. Donne le chemin du fichier dans `exports/` et demande à l'utilisateur de la regarder. Tu ne peux pas entendre la voix : ne dis pas qu'elle est bonne, dis ce que tu as vérifié (durée, transcription).
@@ -25,7 +27,7 @@ Vérifie chaque point avant d'installer, et annonce les gros téléchargements (
    - télécharger `ComfyUI_windows_portable_nvidia.7z` depuis https://github.com/comfyanonymous/ComfyUI/releases/latest (environ 2 Go) ;
    - l'extraire dans `outils/` avec 7-Zip (`winget install 7zip.7zip`, puis `"C:\Program Files\7-Zip\7z.exe" x fichier.7z -ooutils`).
    - Version testée : v0.44.0. Il faut le nœud natif `WanInfiniteTalkToVideo` : une fois ComfyUI lancé, `http://127.0.0.1:8188/object_info/WanInfiniteTalkToVideo` doit répondre autre chose que `{}`.
-4. **Modèles d'animation** (environ 31 Go, reprise possible) : `python outils/telecharger_modeles.py`.
+4. **Modèles d'animation** (environ 35 Go, reprise possible) : `python outils/telecharger_modeles.py`.
 5. **Environnement Python** `.venv` (Python 3.12 ou plus) :
    ```
    py -3 -m venv .venv
@@ -45,9 +47,9 @@ Une fois, pour fabriquer la partie fixe (message dit d'un seul tenant, puis anim
 .venv\Scripts\python.exe -u pere_noel.py preparer-corps
 ```
 
-Environ 1 h (synthèse de 4 prises, choix par Whisper et par ressemblance de voix, puis animation de 35 s). À refaire seulement si `corps` change dans `config.json`.
+Environ 45 min : synthèse de 4 prises, choix par Whisper et par ressemblance de voix, animation de 10 s (environ 20 min), puis super-résolution SeedVR2 (15 à 30 min). À refaire seulement si `corps` ou le portrait change. Si la super-résolution s'interrompt, `preparer-corps --etape superresolution` reprend là où elle s'est arrêtée.
 
-Ensuite, pour chaque prénom (environ 7 min) :
+Ensuite, pour chaque prénom (15 à 30 min) :
 
 ```
 .venv\Scripts\python.exe -u pere_noel.py generer Léa
@@ -67,13 +69,18 @@ Page web (prénom, suivi en direct, historique, file d'attente) : `Ouvrir-Pere-N
    .venv\Scripts\python.exe voix\elevenlabs.py essai VOICE_ID      (quelques crédits, pour écouter)
    ```
    En offre gratuite, l'API refuse les voix de la bibliothèque publique (erreur 402 ou `free_users_not_allowed`) : proposer une voix « premade » ou une voix créée dans son compte.
-3. Annonce le coût (environ 600 crédits par prise, 2 prises par défaut, `--essais 1` pour une seule) puis lance :
+3. Une seule fois pour cette voix : le message est dit d'un seul tenant (2 prises, environ 250 crédits en tout), puis animé (environ 45 min). Annonce le coût avant de lancer :
    ```
-   .venv\Scripts\python.exe -u pere_noel.py complet Léa --elevenlabs VOICE_ID --suffixe elevenlabs --voix "Nom de la voix"
+   .venv\Scripts\python.exe -u pere_noel.py preparer-corps --dossier base/corps-elevenlabs --elevenlabs VOICE_ID --voix "Nom de la voix" --ralenti 0.95
    ```
-   Le texte complet est dit d'un seul tenant, Whisper garde la prise la plus fidèle et repère les phrases, les pauses sont allongées, puis toute la vidéo est animée (environ 1 h). Résultat : `exports/pere-noel-lea-elevenlabs.mp4`. Les prises restent dans `sources/`.
+   `--ralenti 0.95` calme un peu le débit des voix ElevenLabs (environ 190 mots/min sinon).
+4. Ensuite, pour chaque prénom (15 à 30 min, 3 prises de la salutation, environ 80 crédits) :
+   ```
+   .venv\Scripts\python.exe -u pere_noel.py generer Léa --dossier-corps base/corps-elevenlabs
+   ```
+   La voix ElevenLabs et le débit sont relus dans `base/corps-elevenlabs/voix.json`. Résultat : `exports/pere-noel-lea-elevenlabs.mp4`. Pour que la page web utilise cette voix, mettre `"dossier_corps": "base/corps-elevenlabs"` dans `config.json`.
 
-Avec un fichier audio déjà prêt (texte complet, une ou plusieurs prises) : `pere_noel.py complet Léa --audio prise1.mp3 prise2.mp3 --suffixe ma-voix`.
+Avec des enregistrements déjà prêts (par exemple téléchargés depuis le site ElevenLabs) : le message se prépare avec `preparer-corps --dossier base/corps-ma-voix --audio prise1.mp3 prise2.mp3 --voix "Ma voix" --suffixe ma-voix`, et chaque prénom avec `generer Léa --dossier-corps base/corps-ma-voix --salut-audio salut1.mp3 salut2.mp3`. Une prise du texte complet convient aussi : le script n'en garde que la partie utile.
 
 ## Personnaliser
 
@@ -86,6 +93,11 @@ Tout se règle dans `config.json` :
 | Débit de la voix gratuite | `ralenti_voix` (0,9 = 10 % plus lent) | `preparer-corps` |
 | Musique | `musique` (chemin d'un fichier de l'utilisateur, `null` pour aucune), `musique_volume_db` | rien |
 | Portrait | `portrait` (image 1280×720, visage vers `centre_visage`) | `preparer-corps --etape video` |
+| Détail de peau et de barbe | `superresolution` (SeedVR2, `null` pour s'en passer : plus rapide, plus flou) | `preparer-corps --etape video` |
+| Rendu « tourné en caméra » | `finition_film` (caméra à la main, feu qui vacille, halo, grain ; `null` pour aucun) | rien |
+| Son du salon | `ambiance` (écho de la pièce, crépitement du feu, micro de caméra ; `null` pour une voix sèche) | rien |
+
+Le portrait fourni est une image générée façon photo de salon. Pour un rendu encore plus vrai, une vraie photo d'une personne déguisée, de face, assise, cadrée à mi-poitrine, donne le meilleur résultat (règle `centre_visage` sur le centre de son visage).
 
 ## Dépannage
 
@@ -93,3 +105,4 @@ Tout se règle dans `config.json` :
 - Erreur de mémoire vidéo : fermer les autres programmes qui utilisent la carte graphique, puis relancer.
 - La transcription tourne sur le processeur (Whisper en int8) : c'est voulu, ça évite les problèmes de bibliothèques CUDA.
 - Le rendu se fait par morceaux de 81 images (3,24 s) ; la progression est dans le journal et dans `logs/comfyui.log`.
+- Sous Windows, ffmpeg plante parfois quand la mémoire vive manque : le script relance automatiquement, et libère la mémoire de ComfyUI avant la super-résolution.

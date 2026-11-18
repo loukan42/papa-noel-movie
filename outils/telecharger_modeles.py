@@ -1,4 +1,4 @@
-"""Télécharge les modèles d'animation dans ComfyUI (environ 31 Go, reprise possible).
+"""Télécharge les modèles d'animation dans ComfyUI (environ 35 Go, reprise possible).
 
   python outils/telecharger_modeles.py                      # dossier ComfyUI lu dans config.json
   python outils/telecharger_modeles.py D:/ComfyUI_windows_portable
@@ -25,6 +25,10 @@ MODELES = [
               "lightx2v_I2V_14B_480p_cfg_step_distill_rank64_bf16.safetensors", 738005744),
     ("vae", f"{WAN}/vae/wan_2.1_vae.safetensors", 253815318),
     ("audio_encoders", "Kijai/wav2vec2_safetensors/resolve/main/wav2vec2-chinese-base_fp16.safetensors", 190115368),
+    # super-résolution (détail de peau et de barbe), clé « superresolution » de config.json
+    ("diffusion_models", "Comfy-Org/SeedVR2/resolve/main/diffusion_models/seedvr2_3b_int8_convrot.safetensors",
+     3458259704),
+    ("vae", "Comfy-Org/SeedVR2/resolve/main/vae/seedvr2_ema_vae_fp16.safetensors", 501324814),
 ]
 
 

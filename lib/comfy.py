@@ -43,6 +43,17 @@ def attendre_serveur(timeout=300):
     raise RuntimeError("ComfyUI ne répond pas sur " + URL)
 
 
+def liberer():
+    """Demande à ComfyUI de décharger ses modèles (mémoire vidéo et vive)."""
+    try:
+        req = urllib.request.Request(URL + "/free", data=json.dumps({"unload_models": True, "free_memory": True}).encode(),
+                                     headers={"Content-Type": "application/json"})
+        urllib.request.urlopen(req, timeout=30).read()
+        time.sleep(3)
+    except Exception:
+        pass
+
+
 def deposer(fichier: Path, sous_dossier="pere-noel") -> str:
     """Copie un fichier dans input/ de ComfyUI et renvoie le nom à donner aux nœuds Load*."""
     dest = INPUT_DIR / sous_dossier

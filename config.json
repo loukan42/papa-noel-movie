@@ -2,28 +2,18 @@
   "salutation": "Ho, ho, ho ! Bonjour {prenom} !",
   "corps": [
     {
-      "texte": "Tes parents m'ont dit que tu allais être encore plus sage cette année.",
-      "pause": 0.6,
-      "plan": "serre"
-    },
-    {
-      "texte": "Bien ranger ta chambre, bien te brosser les dents, et faire tout ce qu'il faut pour être un enfant sage, pour que je puisse t'apporter tous les cadeaux que tu veux pour Noël.",
-      "pause": 0.7,
-      "plan": "large"
-    },
-    {
-      "texte": "Je sais qu'il y a beaucoup d'enfants qui me demandent des cadeaux, donc je ne pourrai peut-être pas trouver tous ceux que tu veux.",
+      "texte": "Je te souhaite un joyeux Noël !",
       "pause": 0.45,
-      "plan": "large"
-    },
-    {
-      "texte": "Mais en tout cas, je te promets de faire de mon mieux pour te faire plaisir.",
-      "pause": 0.7,
       "plan": "serre"
     },
     {
-      "texte": "Alors en échange, toi aussi, fais de ton mieux pour faire plaisir à tes parents. Joyeux Noël !",
-      "pause": 1.4,
+      "texte": "On m'a dit que tu étais très sage.",
+      "pause": 0.45,
+      "plan": "serre"
+    },
+    {
+      "texte": "Je ferai de mon mieux pour t'apporter des super cadeaux !",
+      "pause": 1.3,
       "plan": "large"
     }
   ],
@@ -37,16 +27,30 @@
   "largeur": 1280,
   "hauteur": 720,
   "fps": 25,
-  "prompt_video": "Santa Claus speaks warmly and kindly to the camera, natural lip movements, gentle head movements, soft smile, blinking, sitting still in his armchair, warm firelight flickering in the background, static camera.",
+  "prompt_video": "An elderly man dressed as Santa Claus talks warmly to the camera, like a real home video message to a child. Natural lip movements matching the speech, natural head movements, small nods and tilts, expressive eyebrows, natural blinking, visible breathing, slight shoulder movements, warm lamp light and firelight flickering in the background, realistic, static camera.",
   "graine_video": 2412,
   "etapes": 6,
   "corps_debut_silence": 0.15,
   "ralenti_voix": 0.9,
   "zoom_serre": 1.3,
   "centre_visage": [
-    664,
-    290
+    655,
+    285
   ],
   "musique": null,
-  "musique_volume_db": -26
+  "musique_volume_db": -26,
+  "superresolution": {
+    "modele": "seedvr2_3b_int8_convrot.safetensors",
+    "echelle": 1.5
+  },
+  "finition_film": {
+    "grain": 5,
+    "halo": 0.15
+  },
+  "ambiance": {
+    "piece": 0.16,
+    "feu_db": -24,
+    "crepitements": 4,
+    "rt60": 0.3
+  }
 }
